@@ -1,5 +1,7 @@
 ﻿using System;
 using CoreLocation;
+using Location.Dao;
+using Location.Models;
 using UIKit;
 
 namespace Location
@@ -65,6 +67,17 @@ namespace Location
 			Console.WriteLine ("Latitude: " + location.Coordinate.Latitude);
 			Console.WriteLine ("Course: " + location.Course);
 			Console.WriteLine ("Speed: " + location.Speed);
+
+		    var deviceLocation = new DeviceLocation
+		    {
+                Altitude = location.Altitude,
+                Longitude = location.Coordinate.Longitude,
+                Latitude = location.Coordinate.Latitude,
+                Course = location.Course,
+                Speed = location.Speed
+            };
+
+		    Database.SaveItem(deviceLocation);
 		}
 	}
 }
