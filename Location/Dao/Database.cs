@@ -1,147 +1,212 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using Location.Models;
-using SQLite;
+using SQLite.Net;
+using SQLite.Net.Async;
 
 namespace Location.Dao
 {
-    public class Database : SQLiteConnection
+    public class Database : IDatabase
     {
-        protected static Database me = null;
-        protected static string dbLocation;
+        #region Declarations
+        private const string DatabaseTablesNamespace = "Database.Tables";
 
-        static object locker = new object();
+        private SQLiteAsyncConnection _connection;
+        private static bool _isInitialized;
 
-        /// <summary>
-        /// Initializes a new instance of the MwcDatabase. 
-        /// if the database doesn't exist, it will create the database and all the tables.
-        /// </summary>
-        /// <param name='path'>
-        /// Path.
-        /// </param>
-        public Database(string path) : base(path)
+        #endregion
+
+        #region Properties
+
+        public static bool IsInitialized
         {
-            CreateTable<DeviceLocation>();
+            get { return _isInitialized; }
+            private set { _isInitialized = value; }
         }
 
-        static Database()
-        {
-            // set the db location
-            dbLocation = DatabaseFilePath;
+        #endregion
 
-            // instantiate a new db
-            me = new Database(dbLocation);
+        #region Constructors
+
+        // static constructor
+        public Database()
+        {
         }
 
-        public static string DatabaseFilePath
+        #endregion
+
+        #region Public Methods
+
+        public SQLiteAsyncConnection GetOrCreateConnection()
         {
-            get
+            if (!Database.IsInitialized)
             {
-                var sqliteFilename = "MyDatabase.db3";
+                throw new Exception("Database is not initialized.");
+            }
+
+            this._connection = _connection ?? CreateSqliteAsyncConnection();
+            return this._connection;
+        }
+
+        public async Task InitializeSQLiteAsync(CancellationToken cancellationToken)
+        {
+            if (Database.IsInitialized)
+            {
+                throw new Exception("Database context has already been initialized");
+            }
+
+
+            var dbConnection = CreateSqliteAsyncConnection();
+            var tablesToCreate = GetTableTypes();
+            var currentVersion = 1;
+            var nextVersion = 1;
+
+            var toCreate = tablesToCreate as Type[] ?? tablesToCreate.ToArray();
+            await RunDatabasePreDeploymentAsync(
+                dbConnection,
+                toCreate,
+                currentVersion,
+                nextVersion,
+                cancellationToken);
+
+            await RunDatabaseDeploymentAsync(
+                dbConnection,
+                toCreate,
+                currentVersion,
+                nextVersion,
+                cancellationToken);
+
+            await RunDatabasePostDeploymentAsync(
+                dbConnection,
+                toCreate,
+                currentVersion,
+                nextVersion,
+                cancellationToken);
+
+            Database.IsInitialized = true;
+        }
+
+        public async Task DeleteAllDataAsync(CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var dbConnection = GetOrCreateConnection();
+
+            const string query = "DELETE FROM {0}";
+            var tables = GetTableTypes();
+
+            foreach (var item in tables)
+            {
+                await dbConnection.ExecuteAsync(string.Format(query, item.Name));
+            }
+
+        }
+
+
+
+        #endregion
+
+        #region Private Methods
+
+        private SQLiteAsyncConnection CreateSqliteAsyncConnection()
+        {
+            var sqliteFilename = "MyDatabase.db3";
 
 #if __ANDROID__
 				string libraryPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal); ;
 #else
-                // we need to put in /Library/ on iOS5.1 to meet Apple's iCloud terms
-                // (they don't want non-user-generated data in Documents)
-                string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal); // Documents folder
-                string libraryPath = Path.Combine(documentsPath, "../Library/");
+            // we need to put in /Library/ on iOS5.1 to meet Apple's iCloud terms
+            // (they don't want non-user-generated data in Documents)
+            string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal); // Documents folder
+            string libraryPath = Path.Combine(documentsPath, "../Library/");
 #endif
-                var path = Path.Combine(libraryPath, sqliteFilename);
+            var sqLitePath = Path.Combine(libraryPath, sqliteFilename);
 
-                return path;
-            }
+            var connectionString = new SQLiteConnectionString(sqLitePath, true);
+            var sqLiteConnectionPool = new SQLiteConnectionPool(new SQLite.Net.Platform.XamarinIOS.SQLitePlatformIOS());
+
+            Debug.WriteLine(string.Format("sqlitePath: {0}", sqLitePath));
+
+            return new SQLiteAsyncConnection(() =>
+                sqLiteConnectionPool.GetConnection(connectionString));
         }
 
-        public static IEnumerable<T> GetItems<T>() where T : Models.IEntity, new()
+        private async Task
+            RunDatabaseDeploymentAsync(SQLiteAsyncConnection dbConnection,
+                IEnumerable<Type> tablesToCreate,
+                int currentVersion,
+                int nextVersion,
+                CancellationToken cancellationToken)
         {
-            lock (locker)
+            var isConstructed = await DatabaseTablesExist(dbConnection);
+            if (isConstructed)
             {
-                return (from i in me.Table<T>() select i).ToList();
+                return;
             }
+
+            await dbConnection.CreateTablesAsync(tablesToCreate.ToArray());
         }
 
-        public static T GetItem<T>(int id) where T : Models.IEntity, new()
+        private async Task<bool> RunDatabasePreDeploymentAsync(SQLiteAsyncConnection dbConnection,
+            IEnumerable<Type> tablesToCreate,
+            int currentVersion,
+            int nextVersion,
+            CancellationToken cancellationToken)
         {
-            lock (locker)
-            {
-                return (from i in me.Table<T>()
-                        where i.KeyId == id
-                        select i).FirstOrDefault();
-            }
+            return await Task.Factory.StartNew(() => true, cancellationToken);
         }
 
-        public static int SaveItem<T>(T item) where T : Models.IEntity
+        private async Task<bool> RunDatabasePostDeploymentAsync(SQLiteAsyncConnection dbConnection,
+            IEnumerable<Type> tablesToCreate,
+            int currentVersion,
+            int nextVersion,
+            CancellationToken cancellationToken)
         {
-            lock (locker)
-            {
-                if (item.KeyId != 0)
-                {
-                    me.Update(item);
-                    return item.KeyId;
-                }
-                else
-                {
-                    return me.Insert(item);
-                }
-            }
+            return await Task.Factory.StartNew(() => true, cancellationToken);
         }
 
-        public static void SaveItems<T>(IEnumerable<T> items) where T : IEntity
+        private static IEnumerable<Type> GetTableTypes()
         {
-            lock (locker)
-            {
-                me.BeginTransaction();
-
-                foreach (T item in items)
-                {
-                    SaveItem<T>(item);
-                }
-
-                me.Commit();
-            }
+            yield return typeof(DeviceLocation);
         }
 
-        //public static int DeleteAllItems<T>(int id) where T : IEntity, new()
-        //{
-        //    lock (locker)
-        //    {
-        //        return me.DeleteAll<T>();
-        //    }
-        //}
-
-        public static int DeleteItem<T>(int id) where T : IEntity, new()
+        private async Task<bool> DatabaseTablesExist(SQLiteAsyncConnection dbConnection)
         {
-            lock (locker)
-            {
-                return me.Delete<T>(new T() { KeyId = id });
-            }
+            const string query = "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='scalar'";
+            var result = await dbConnection.ExecuteScalarAsync<int>(query);
+            return result == 1;
         }
 
-        public static void ClearTable<T>() where T : Models.IEntity, new()
+        private IEnumerable<Type> TryGetTableTypes(Assembly assembly)
         {
-            lock (locker)
+            try
             {
-                me.Execute(string.Format("delete from \"{0}\"", typeof(T).Name));
+                return assembly.DefinedTypes
+                    .Where(m => m.Namespace == DatabaseTablesNamespace)
+                    .Select(m => m.AsType());
+            }
+            catch (ReflectionTypeLoadException exception)
+            {
+                return new Type[0];
             }
         }
 
-        // helper for checking if database has been populated
-        public static int CountTable<T>() where T : Models.IEntity, new()
+        private IEnumerable GeneratePreDeploymentObjects(IList<Type> mappedTypes)
         {
-            lock (locker)
-            {
-                string sql = string.Format("select count (*) from \"{0}\"", typeof(T).Name);
-                var c = me.CreateCommand(sql, new object[0]);
-                return c.ExecuteScalar<int>();
-            }
+            yield break;
         }
 
-        //public static IEnumerable<Page> GetPagesByCategory(string category)
-        //{
-        //    return me.Query<Page>(string.Format("SELECT * FROM {0} WHERE Category = ?", typeof(Page).Name), category);
-        //}
+        private IEnumerable GeneratePostDeploymentObjects(IList<Type> mappedTypes)
+        {
+            yield break;
+        }
+
+        #endregion
+
     }
 }

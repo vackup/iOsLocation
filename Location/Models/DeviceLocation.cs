@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 using SQLite;
+using SQLite.Net.Attributes;
 
 namespace Location.Models
 {
+    [Table("deviceLocation")]
     public class DeviceLocation : Entity
     {
         public double Altitude { get; set; }
