@@ -1,5 +1,7 @@
 ﻿using System;
 using CoreLocation;
+using Location.Core.ViewModels;
+using MvvmCross.Binding.BindingContext;
 using MvvmCross.iOS.Views;
 using UIKit;
 
@@ -11,16 +13,11 @@ namespace Location.Views
 		public static bool UserInterfaceIdiomIsPhone {
 			get { return UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone; }
 		}
-
-		public static ILocationManager Manager { get; set;}
 		#endregion
 
 		#region Constructors
-		public LocationView (ILocationManager locationManager) : base ("LocationView", null)
+		public LocationView () : base ("LocationView", null)
 		{
-			// As soon as the app is done launching, begin generating location updates in the location manager
-			Manager = locationManager;
-			Manager.StartLocationUpdates();
 		}
 		#endregion
 
@@ -54,22 +51,27 @@ namespace Location.Views
 		public override void ViewDidLoad ()
 		{
 			base.ViewDidLoad ();
-			// Perform any additional setup after loading the view, typically from a nib.
+            // Perform any additional setup after loading the view, typically from a nib.
 
-			// It is better to handle this with notifications, so that the UI updates
-			// resume when the application re-enters the foreground!
-			//Manager.LocationUpdated += HandleLocationChanged;
+            // It is better to handle this with notifications, so that the UI updates
+            // resume when the application re-enters the foreground!
+            //Manager.LocationUpdated += HandleLocationChanged;
 
-			// Screen subscribes to the location changed event
-			UIApplication.Notifications.ObserveDidBecomeActive ((sender, args) => {
-				Manager.LocationUpdated += HandleLocationChanged;
-			});
+            // TODO: do bindings
 
-			// Whenever the app enters the background state, we unsubscribe from the event 
-			// so we no longer perform foreground updates
-			UIApplication.Notifications.ObserveDidEnterBackground ((sender, args) => {
-				Manager.LocationUpdated -= HandleLocationChanged;
-			});
+   //         this.CreateBinding(TipLabel).To((TipViewModel vm) => vm.Tip).Apply();
+   //         this.CreateBinding(lblAltitude).To((LocationViewModel vm) => vm.Tip).Apply();
+
+   //         // Screen subscribes to the location changed event
+   //         UIApplication.Notifications.ObserveDidBecomeActive ((sender, args) => {
+			//	Manager.LocationUpdated += HandleLocationChanged;
+			//});
+
+			//// Whenever the app enters the background state, we unsubscribe from the event 
+			//// so we no longer perform foreground updates
+			//UIApplication.Notifications.ObserveDidEnterBackground ((sender, args) => {
+			//	Manager.LocationUpdated -= HandleLocationChanged;
+			//});
 		}
 		#endregion
 

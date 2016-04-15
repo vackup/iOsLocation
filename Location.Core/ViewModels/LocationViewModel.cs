@@ -8,7 +8,9 @@ namespace Location.Core.ViewModels
 
         public LocationViewModel(ILocationManager locationManager)
         {
+            // As soon as the app is done launching, begin generating location updates in the location manager
             _locationManager = locationManager;
+            _locationManager.StartLocationUpdates();
         }
 
         public override void Start()
