@@ -1,0 +1,31 @@
+﻿<Properties StartupItem="Location/Location.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|iPhoneSimulator" PreferredExecutionTarget="MonoDevelop.IPhone.IPhoneSimulatorTarget.IPhone6s.9.3" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Location/LocationManager.cs">
+    <Files>
+      <File FileName="Location/Dao/Database.cs" Line="26" Column="14" />
+      <File FileName="Location/AppDelegate.cs" Line="26" Column="25" />
+      <File FileName="Location/LocationManager.cs" Line="53" Column="1" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="Location" expanded="True">
+            <Node name="Location" expanded="True">
+              <Node name="References" expanded="True" />
+              <Node name="ComponentReferenceFolder" expanded="True" />
+              <Node name="Dao" expanded="True" />
+              <Node name="LocationManager.cs" selected="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="/Users/hernanzaldivar/Documents/Apps.Net/OsLocation.git/Location/Dao/Database.cs" line="78" column="1" />
+      <Breakpoint file="/Users/hernanzaldivar/Documents/Apps.Net/OsLocation.git/Location/Dao/Database.cs" line="32" column="1" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
