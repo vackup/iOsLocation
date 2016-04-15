@@ -15,6 +15,8 @@ namespace Location.Dao
 {
     public class Database : IDatabase
     {
+        private readonly IConfiguration _configuration;
+
         #region Declarations
         private const string DatabaseTablesNamespace = "Database.Tables";
 
@@ -36,8 +38,9 @@ namespace Location.Dao
         #region Constructors
 
         // static constructor
-        public Database()
+        public Database(IConfiguration configuration)
         {
+            _configuration = configuration;
         }
 
         #endregion
@@ -116,19 +119,20 @@ namespace Location.Dao
         private SQLiteAsyncConnection CreateSqliteAsyncConnection()
         {
             var sqliteFilename = "MyDatabase.db3";
+            var libraryPath = _configuration.DbPath;
 
-#if __ANDROID__
-				string libraryPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal); ;
-#else
-            // we need to put in /Library/ on iOS5.1 to meet Apple's iCloud terms
-            // (they don't want non-user-generated data in Documents)
-            string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal); // Documents folder
-            string libraryPath = Path.Combine(documentsPath, "../Library/");
-#endif
+//#if __ANDROID__
+//				string libraryPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal); ;
+//#else
+//            // we need to put in /Library/ on iOS5.1 to meet Apple's iCloud terms
+//            // (they don't want non-user-generated data in Documents)
+//            string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal); // Documents folder
+//            string libraryPath = Path.Combine(documentsPath, "../Library/");
+//#endif
             var sqLitePath = Path.Combine(libraryPath, sqliteFilename);
 
             var connectionString = new SQLiteConnectionString(sqLitePath, true);
-            var sqLiteConnectionPool = new SQLiteConnectionPool(new SQLite.Net.Platform.XamarinIOS.SQLitePlatformIOS());
+            var sqLiteConnectionPool = new SQLiteConnectionPool(_configuration.SQLitePlatform);
 
             Debug.WriteLine(string.Format("sqlitePath: {0}", sqLitePath));
 

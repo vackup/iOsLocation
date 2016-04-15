@@ -1,30 +1,45 @@
 ﻿using Foundation;
 using UIKit;
 using System;
+using MvvmCross.Core.ViewModels;
+using MvvmCross.iOS.Platform;
+using MvvmCross.iOS.Views.Presenters;
+using MvvmCross.Platform;
 
 namespace Location
 {
 	// The UIApplicationDelegate for the application. This class is responsible for launching the
 	// User Interface of the application, as well as listening (and optionally responding) to application events from iOS.
 	[Register ("AppDelegate")]
-	public class AppDelegate : UIApplicationDelegate
-	{
-		// class-level declarations
+	public class AppDelegate : MvxApplicationDelegate
+    {
+	    // class-level declarations
 
-		public override UIWindow Window {
+        public override UIWindow Window {
 			get;
 			set;
 		}
 
 		public override bool FinishedLaunching (UIApplication application, NSDictionary launchOptions)
 		{
-			// Override point for customization after application launch.
-			// If not required for your application you can safely delete this method
+            // Override point for customization after application launch.
+            // If not required for your application you can safely delete this method
+            Window = new UIWindow(UIScreen.MainScreen.Bounds);
 
-			return true;
+            var presenter = new MvxIosViewPresenter(this, Window);
+
+            var setup = new Setup(this, presenter);
+            setup.Initialize();
+
+            var startup = Mvx.Resolve<IMvxAppStart>();
+            startup.Start();
+
+            Window.MakeKeyAndVisible();
+
+            return true;
 		}
 
-		public override void OnResignActivation (UIApplication application)
+	    public override void OnResignActivation (UIApplication application)
 		{
 			// Invoked when the application is about to move from active to inactive state.
 			// This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) 

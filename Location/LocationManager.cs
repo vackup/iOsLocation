@@ -6,9 +6,8 @@ using UIKit;
 
 namespace Location
 {
-	public class LocationManager
-	{
-
+    public class LocationManager : ILocationManager
+    {
 		protected CLLocationManager locMgr;
 
 		public event EventHandler<LocationUpdatedEventArgs> LocationUpdated = delegate { };
@@ -49,8 +48,20 @@ namespace Location
 				LocMgr.DesiredAccuracy = 1;
 
 				LocMgr.LocationsUpdated += (object sender, CLLocationsUpdatedEventArgs e) => {
-					// fire our custom Location Updated event
-					LocationUpdated (this, new LocationUpdatedEventArgs (e.Locations [e.Locations.Length - 1]));
+                    // fire our custom Location Updated event
+
+                    var location  = e.Locations[e.Locations.Length - 1];
+
+                    var deviceLocation = new DeviceLocation
+                    {
+                        Altitude = location.Altitude,
+                        Longitude = location.Coordinate.Longitude,
+                        Latitude = location.Coordinate.Latitude,
+                        Course = location.Course,
+                        Speed = location.Speed
+                    };
+
+                    LocationUpdated (this, new LocationUpdatedEventArgs (deviceLocation));
 				};
 
 				LocMgr.StartUpdatingLocation ();
@@ -61,23 +72,14 @@ namespace Location
 		public void PrintLocation (object sender, LocationUpdatedEventArgs e)
 		{
 			
-			CLLocation location = e.Location;
+			var location = e.Location;
 			Console.WriteLine ("Altitude: " + location.Altitude + " meters");
-			Console.WriteLine ("Longitude: " + location.Coordinate.Longitude);
-			Console.WriteLine ("Latitude: " + location.Coordinate.Latitude);
+			Console.WriteLine ("Longitude: " + location.Longitude);
+			Console.WriteLine ("Latitude: " + location.Latitude);
 			Console.WriteLine ("Course: " + location.Course);
 			Console.WriteLine ("Speed: " + location.Speed);
 
-		    var deviceLocation = new DeviceLocation
-		    {
-                Altitude = location.Altitude,
-                Longitude = location.Coordinate.Longitude,
-                Latitude = location.Coordinate.Latitude,
-                Course = location.Course,
-                Speed = location.Speed
-            };
-
-		    Database.SaveItem(deviceLocation);
+		    //Database.SaveItem(deviceLocation);
 		}
 	}
 }

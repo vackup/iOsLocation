@@ -1,25 +1,25 @@
 ﻿using System;
-
-using UIKit;
 using CoreLocation;
+using MvvmCross.iOS.Views;
+using UIKit;
 
-namespace Location
+namespace Location.Views
 {
-	public partial class ViewController : UIViewController
-	{
+	public partial class LocationView : MvxViewController
+    {
 		#region Computed Properties
 		public static bool UserInterfaceIdiomIsPhone {
 			get { return UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone; }
 		}
 
-		public static LocationManager Manager { get; set;}
+		public static ILocationManager Manager { get; set;}
 		#endregion
 
 		#region Constructors
-		public ViewController (IntPtr handle) : base (handle)
+		public LocationView (ILocationManager locationManager) : base ("LocationView", null)
 		{
 			// As soon as the app is done launching, begin generating location updates in the location manager
-			Manager = new LocationManager();
+			Manager = locationManager;
 			Manager.StartLocationUpdates();
 		}
 		#endregion
@@ -37,11 +37,11 @@ namespace Location
 		public void HandleLocationChanged (object sender, LocationUpdatedEventArgs e)
 		{
 			// Handle foreground updates
-			CLLocation location = e.Location;
+			var location = e.Location;
 
 			lblAltitude.Text = location.Altitude + " meters";
-			lblLongitude.Text = location.Coordinate.Longitude.ToString ();
-			lblLAtitude.Text = location.Coordinate.Latitude.ToString ();
+			lblLongitude.Text = location.Longitude.ToString ();
+			lblLAtitude.Text = location.Latitude.ToString ();
 			lblCourse.Text = location.Course.ToString ();
 			lblSpeed.Text = location.Speed.ToString ();
 
