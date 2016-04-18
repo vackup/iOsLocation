@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Location.Core.ViewModels;
 using Location.Dao;
 using Location.Models;
@@ -19,12 +20,17 @@ namespace Location.Core
 
         public override async void Initialize()
         {
+            InitializeContainers();
+
+            await SetupDataBase();
+        }
+
+        private static void InitializeContainers()
+        {
             Mvx.LazyConstructAndRegisterSingleton<IRepository<DeviceLocation>, Repository<DeviceLocation>>();
             Mvx.RegisterType<IDatabase, Database>();
 
             Mvx.RegisterSingleton<IMvxAppStart>(new MvxAppStart<LocationViewModel>());
-
-            await SetupDataBase();
         }
 
         private async Task SetupDataBase()

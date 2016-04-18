@@ -4,64 +4,98 @@ namespace Location.Core.ViewModels
 {
     public class LocationViewModel : MvxViewModel
     {
-        readonly ILocationManager _locationManager;
+        private readonly ILocationManager _locationManager;
+
+        private double _speed;
+        private double _course;
+        private double _altitude;
+        private double _longitude;
+        private double _latitude;
 
         public LocationViewModel(ILocationManager locationManager)
         {
             // As soon as the app is done launching, begin generating location updates in the location manager
             _locationManager = locationManager;
             _locationManager.StartLocationUpdates();
+
+            _locationManager.LocationUpdated += HandleLocationChanged;
+        }
+
+        private void HandleLocationChanged(object sender, LocationUpdatedEventArgs e)
+        {
+            // Handle foreground updates
+            var location = e.Location;
+
+            Altitude = location.Altitude;
+            Longitude = location.Longitude;
+            Latitude = location.Latitude;
+            Course = location.Course;
+            Speed = location.Speed;
+
+            //Console.WriteLine("foreground updated");
         }
 
         public override void Start()
         {
-            _subTotal = 100;
-            _generosity = 10;
-            Recalcuate();
+            //Recalcuate();
             base.Start();
         }
 
-        double _subTotal;
-
-        public double SubTotal
+        public double Altitude
         {
-            get { return _subTotal; }
+            get { return _altitude; }
             set
             {
-                _subTotal = value;
-                RaisePropertyChanged(() => SubTotal);
-                Recalcuate();
+                _altitude = value;
+                RaisePropertyChanged(() => Altitude);
+                //Recalcuate();
             }
         }
 
-        int _generosity;
-
-        public int Generosity
+        public double Longitude
         {
-            get { return _generosity; }
+            get { return _longitude; }
             set
             {
-                _generosity = value;
-                RaisePropertyChanged(() => Generosity);
-                Recalcuate();
+                _longitude = value;
+                RaisePropertyChanged(() => Longitude);
+                //Recalcuate();
             }
         }
 
-        double _tip;
-
-        public double Tip
+        public double Latitude
         {
-            get { return _tip; }
+            get { return _latitude; }
             set
             {
-                _tip = value;
-                RaisePropertyChanged(() => Tip);
+                _latitude = value;
+                RaisePropertyChanged(() => Latitude);
             }
         }
 
-        void Recalcuate()
+        public double Course
         {
-            //Tip = _locationManager.TipAmount(SubTotal, Generosity);
+            get { return _course; }
+            set
+            {
+                _course = value;
+                RaisePropertyChanged(() => Course);
+            }
         }
+
+        public double Speed
+        {
+            get { return _speed; }
+            set
+            {
+                _speed = value;
+                RaisePropertyChanged(() => Speed);
+            }
+        }
+
+        //void Recalcuate()
+        //{
+        //    //Latitude = _locationManager.TipAmount(Altitude, Longitude);
+        //}
     }
 }
