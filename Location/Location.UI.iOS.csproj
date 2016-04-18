@@ -113,11 +113,11 @@
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
     <Compile Include="Setup.cs" />
+    <Compile Include="LocationManager.cs" />
     <Compile Include="Views\LocationView.cs" />
     <Compile Include="Views\LocationView.designer.cs">
       <DependentUpon>LocationView.cs</DependentUpon>
     </Compile>
-    <Compile Include="LocationManager.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <ItemGroup>

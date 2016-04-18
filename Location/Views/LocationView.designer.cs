@@ -9,7 +9,7 @@ using System;
 using System.CodeDom.Compiler;
 using UIKit;
 
-namespace Location.Views
+namespace Location
 {
 	[Register ("LocationView")]
 	partial class LocationView
@@ -24,7 +24,7 @@ namespace Location.Views
 
 		[Outlet]
 		[GeneratedCode ("iOS Designer", "1.0")]
-		UILabel lblLAtitude { get; set; }
+		UILabel lblLatitud { get; set; }
 
 		[Outlet]
 		[GeneratedCode ("iOS Designer", "1.0")]
@@ -44,9 +44,9 @@ namespace Location.Views
 				lblCourse.Dispose ();
 				lblCourse = null;
 			}
-			if (lblLAtitude != null) {
-				lblLAtitude.Dispose ();
-				lblLAtitude = null;
+			if (lblLatitud != null) {
+				lblLatitud.Dispose ();
+				lblLatitud = null;
 			}
 			if (lblLongitude != null) {
 				lblLongitude.Dispose ();
