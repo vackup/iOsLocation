@@ -118,6 +118,7 @@
     <Compile Include="Views\LocationView.designer.cs">
       <DependentUpon>LocationView.cs</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\MyDebugTrace.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <ItemGroup>
@@ -129,5 +130,8 @@
       <Project>{3224E25E-9640-4201-93FB-9A3A4C5E32A2}</Project>
       <Name>Location.Core</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Helpers\" />
   </ItemGroup>
 </Project>

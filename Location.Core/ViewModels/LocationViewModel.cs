@@ -1,4 +1,5 @@
 using MvvmCross.Core.ViewModels;
+using MvvmCross.Platform;
 
 namespace Location.Core.ViewModels
 {
@@ -31,6 +32,8 @@ namespace Location.Core.ViewModels
             Latitude = location.Latitude;
             Course = location.Course;
             Speed = location.Speed;
+
+			Mvx.TaggedTrace("LocationChanged", "LocationChanged", location);
 
             //Console.WriteLine("foreground updated");
         }

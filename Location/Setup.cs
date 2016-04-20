@@ -5,6 +5,7 @@ using MvvmCross.Core.ViewModels;
 using MvvmCross.iOS.Platform;
 using MvvmCross.iOS.Views.Presenters;
 using MvvmCross.Platform;
+using MvvmCross.Platform.Platform;
 
 namespace Location
 {
@@ -41,5 +42,10 @@ namespace Location
             Mvx.LazyConstructAndRegisterSingleton<IConfiguration, Configuration>();
             Mvx.RegisterType<ILocationManager, LocationManager>();
         }
+
+		protected override IMvxTrace CreateDebugTrace()
+		{
+			return new MyDebugTrace();
+		}
     }
 }
